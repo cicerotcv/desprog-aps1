@@ -1,7 +1,7 @@
 
 #include <stdlib.h>
 
-#define threshold 1e-6
+#define threshold 0.000001
 
 double is_equal(double a, double b) { return abs(a - b) < threshold; }
 
@@ -9,7 +9,7 @@ double calc_lambda(point p, point a, point b) {
     if (!is_equal(a.x, b.x)) {
         return (p.x - a.x) / (b.x - a.x);
     }
-    return (p.y - a.y) / (b.y - a.y);
+    return (double)((p.y - a.y) / (b.y - a.y));
 }
 
 double is_between(double number, double a, double b) {
@@ -29,6 +29,17 @@ double is_between(double number, double a, double b) {
  */
 int case_2(point p, point a, point b) {
     double lambda = calc_lambda(p, a, b);
-    return is_equal((p.y - a.y) * (a.x - b.x), (p.x - a.x) * (a.y - b.y)) &&
+    return is_equal((double)(p.y - a.y) * (a.x - b.x),
+                    (double)(p.x - a.x) * (a.y - b.y)) &&
            is_between(lambda, 0.0, 1.0);
+}
+
+int case_1(point p, point a, point b) {
+    // se p está à direita do segmento AB
+    // ax + by = 1;
+    if (p.x > a.x && p.x > b.x) {
+        return 0;
+    }
+
+    return 0;
 }
