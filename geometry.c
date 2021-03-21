@@ -6,26 +6,39 @@
 
 #define threshold 0.000001
 
+/**
+ * Verifica se dois números do tipo double possuem uma diferença menor que
+ * a tolerância;
+ */
 int is_equal(double a, double b) { return abs(a - b) < threshold; }
+
+/**
+ * Verifica se dois pontos são iguais;
+ */
 int points_equal(point a, point b) { return a.x == b.x && a.y == b.y; }
 
 /**
- * calcula a proporção entre os segmentos AP e AB
+ * Calcula a proporção entre os segmentos AP e AB
  */
 double calc_lambda(point p, point a, point b) {
-    int delta_x_ab = b.x - a.x;
-    int delta_y_ab = b.y - a.y;
-    int delta_x_ap = p.x - a.x;
-    int delta_y_ap = p.y - a.y;
+    int delta_ab_x = b.x - a.x;
+    int delta_ab_y = b.y - a.y;
+    int delta_ap_x = p.x - a.x;
+    int delta_ap_y = p.y - a.y;
 
-    if (delta_x_ab != 0 && delta_x_ap != 0) {
-        return delta_x_ap / (double)delta_x_ab;
-    } else if (delta_y_ab != 0 && delta_y_ap != 0) {
-        return delta_y_ap / (double)delta_y_ab;
+    if (delta_ab_x != 0 && delta_ap_x != 0) {
+        return delta_ap_x / (double)delta_ab_x;
+    } else if (delta_ab_y != 0 && delta_ap_y != 0) {
+        return delta_ap_y / (double)delta_ab_y;
     }
     return 0;
 }
 
+/**
+ * Verifica se um número do tipo double está dentro de um intervalo
+ * entre dois outros números do tipo double levando em conta a
+ * tolerância;
+ */
 int is_between(double number, double a, double b) {
     double min, max;
     if (a > b) {
@@ -39,21 +52,36 @@ int is_between(double number, double a, double b) {
 }
 
 /**
- * Verifica se o ponto está sob o segmento de reta AB
+ * Verifica se determinado ponto P está contido na reta que
+ * passa pelos pontos A e B;
+ */
+int ab_contains(point p, point a, point b) {
+    return (p.y - a.y) * (a.x - b.x) == (p.x - a.x) * (a.y - b.y);
+}
+
+/**
+ * Verifica se um ponto P está sobre o segmento de reta AB
  */
 int case_2(point p, point a, point b) {
     if (a.x == p.x && b.x == p.x && a.y == b.y) {
         return 1;
     }
+
     double lambda = calc_lambda(p, a, b);
-    int result = (p.y - a.y) * (a.x - b.x) == (p.x - a.x) * (a.y - b.y);
-    return result && is_between(lambda, 0.0, 1.0);
+    return ab_contains(p, a, b) && is_between(lambda, 0.0, 1.0);
 }
 
+/**
+ * Verifica se a projeção na horizontal de um determinado
+ * ponto P cruza o segmento AB;
+ */
 int case_1(point p, point a, point b) {
+    // caso trivial em que p.y é menor ou igual a ambas as
+    // extremidades do segmento AB;
     if (p.y <= b.y && p.y <= a.y) {
         return 0;
     }
+    // p.y deve estar entre a.y e b.y;
     if (is_between(p.y, a.y, b.y)) {
         if (a.x == b.x) {
             return p.x < a.x;
@@ -67,7 +95,11 @@ int case_1(point p, point a, point b) {
 }
 
 int verify(point p, point a, point b) {
+    // caso triviail: se A e B forem coincidentes, os únicos
+    // casos possíveis são 2 ou 0;
     if (points_equal(a, b)) {
+        // caso A == B == P, o ponto pertence ao segmento
+        // e ao polígono;
         if (points_equal(a, p)) {
             return 2;
         }
